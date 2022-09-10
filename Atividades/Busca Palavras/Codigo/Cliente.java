@@ -5,10 +5,7 @@ import java.util.*;
 class Cliente {
 
 	public static void main(String argv[]) throws Exception {
-		String sentence;
-		String modifiedSentence;
-		BufferedReader br = null;
-		FileReader fr = null;
+		String serverResponse;
 		List<String> texto = new ArrayList<String>();
 
 		Scanner sc = new Scanner(System.in);
@@ -27,41 +24,38 @@ class Cliente {
 				continue;
 			}
 		}
+		sc.close();
+
+		// for(String s: texto){
+		// 	System.out.println("Li "+ s);
+		// }
+
+		// abrindo uma socket p/ o servidor
+		Socket clientSocket = new Socket("localhost", 4242);
+		// configurando para mandar p/ o servidor
+		DataOutputStream outToServer
+				= new DataOutputStream(
+						clientSocket.getOutputStream());
 
 		for(String s: texto){
-			System.out.println("Palavras lidas pelo cliente:" + s);
-		}
-
-		for(String s: texto){
-
-			BufferedReader inFromUser
-						= new BufferedReader(
-							new InputStreamReader(System.in));
-
-			// abrindo uma socket p/ o servidor
-			Socket clientSocket = new Socket("localhost", 4242);
-
-			// configurando para mandar p/ o servidor
-			DataOutputStream outToServer
-					= new DataOutputStream(
-							clientSocket.getOutputStream());
-			
-			// configurando para receber do servidor
-			BufferedReader inFromServer
-					= new BufferedReader(
-							new InputStreamReader(clientSocket.getInputStream()));
-
 			// mandando o texto p/ o servidor
-			outToServer.writeBytes(s + '\n');
-
-			// lendo o que o servidor respondeu
-			modifiedSentence = inFromServer.readLine();
-
-			System.out.println("Servidor Respondeu:" + modifiedSentence);
-			clientSocket.close();
+			outToServer.writeBytes(s + '\n');							
 		}
+
+		outToServer.writeBytes("acabou\n");
+
+		// configurando para receber do servidor
+		BufferedReader inFromServer
+				= new BufferedReader(
+						new InputStreamReader(clientSocket.getInputStream()));
+		// lendo o que o servidor respondeu
+		serverResponse = inFromServer.readLine();
+		clientSocket.close();
+
+		serverResponse.replace("$", "\n");
+
 		System.out.println("##RELATORIO##;");
-		// printando total de palavras
+		System.out.println(serverResponse);
 		System.out.println("###;");
 		System.exit(0);
 	}

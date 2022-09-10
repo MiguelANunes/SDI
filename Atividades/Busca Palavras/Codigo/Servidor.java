@@ -1,38 +1,27 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.HashMap;
 
+
 class Servidor {
 
-	public static String findWords(String sentence, List<String> targets){
-		// removendo a assinatura do cliente da mensagem
-		String result = "0";
-		Integer ultimaOcorrencia = 0;
+	public static HashMap<String, Integer> findWords(String sentence, List<String> targets){
 		Integer total = 0;
 		HashMap<String, Integer> ocorrencias = new HashMap<String, Integer>();
-		
+	
 		for(String alvo: targets){
-			total = 0;
-			while(ultimaOcorrencia != -1) {
-			
-				ultimaOcorrencia = sentence.indexOf(alvo, ultimaOcorrencia);
-			
-				if (ultimaOcorrencia != -1) {
-					total++;
-					ultimaOcorrencia += alvo.length();
-				}
-			}
+			total = (sentence.length() - sentence.replace(alvo, "").length()) / alvo.length();
 			ocorrencias.put(alvo, total);
 		}
-		return result;
+		return ocorrencias;
 	}
 
 	public static void main(String argv[]) throws Exception {
 		String clientSentence = "1";
-		Integer cont=0;
 		List<String> palavrasAlvo = new ArrayList<String>();
 		// abrindo uma socket para comunicar com o cliente
 		ServerSocket welcomeSocket = new ServerSocket(4242);
@@ -54,36 +43,51 @@ class Servidor {
 				continue;
 			}
 		}
+		sc.close();
 
-		System.out.println("Servidor leu:");
-		for(String s: palavrasAlvo){
-			System.out.println("Palavras que o servidor quer:" + s);
+		// colocando o array de palavras alvo em ordem alfabética
+		Collections.sort(palavrasAlvo);
+
+		// configurando como vai receber do cliente
+		Socket connectionSocket = welcomeSocket.accept();
+		BufferedReader inFromClient
+				= new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+		DataOutputStream outToClient
+				= new DataOutputStream(connectionSocket.getOutputStream());
+
+		// salvando em um hash map as palavras que quero encontrar e a qtd que encotrei
+		HashMap<String, Integer> palavrasEncontradas = new HashMap<String, Integer>();
+		for(String alvo: palavrasAlvo){
+			// inicializando
+			palavrasEncontradas.put(alvo, 0);
 		}
-
-		while (true) {
-			// configurando como vai receber do cliente
-			Socket connectionSocket = welcomeSocket.accept();
-			BufferedReader inFromClient
-					= new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-			DataOutputStream outToClient
-					= new DataOutputStream(connectionSocket.getOutputStream());
-
+		String returnString = "0";
+		while (true){
 			// recebendo do cliente
 			clientSentence = inFromClient.readLine();
-			// printando o que o servidor leu
-			System.out.println("Servidor recebeu("+cont+"): "+clientSentence);
-			clientSentence
-					= findWords(clientSentence, palavrasAlvo) + '\n';
-			// enviando resposta para o cliente
-			outToClient.writeBytes(clientSentence);
+			// se recebi o sinal para terminar, retorno pro cliente o resultado
+			if(clientSentence.equals("acabou")){
 
-			// cont++;
-			if (cont==1) {
-				// Servidor fecha depois de processar uma linha
-				// não sei se isso é do exemplo ou se é pra ser assim no final mesmo
-				System.out.println("Servidor finalizado com sucesso!");
-				System.exit(0);
+				// juntando o resultado do processamento numa só string
+				for(String alvo: palavrasAlvo){
+					// "$" marca fim de linha, não posso colocar \n pois não tenho como
+					// facilmente ler várias linhas no cliente
+					returnString = alvo + palavrasEncontradas.get(alvo).toString() + "$";
+				}
+				outToClient.writeBytes(returnString);
+				break;
+			}
+			// se não, processo
+			Integer novo = 0, velho = 0;
+			for(String alvo: palavrasAlvo){
+				velho = palavrasEncontradas.get(alvo);
+				novo  = findWords(clientSentence, palavrasAlvo).get(alvo);
+				palavrasEncontradas.put(alvo, novo + velho);
 			}
 		}
+
+		welcomeSocket.close();
+		System.out.println("Servidor finalizado com sucesso!");
+		System.exit(0);
 	}
 }
