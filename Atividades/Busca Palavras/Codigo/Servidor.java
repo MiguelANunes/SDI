@@ -47,7 +47,8 @@ class Servidor {
 					s1 = sc.nextLine();
 					// e paro quando acho as palavras do cliente
 					if(s1.equals("##Clientes##;")) break;
-					palavrasAlvo.add(s1);
+					// removo os ";" das palavras que o servidor quer
+					palavrasAlvo.add(s1.replace(";", ""));
 				}
 			}else{
 				continue;
@@ -76,7 +77,7 @@ class Servidor {
 			// enviando resposta para o cliente
 			outToClient.writeBytes(clientSentence);
 
-			cont++;
+			// cont++;
 			if (cont==1) {
 				// Servidor fecha depois de processar uma linha
 				// não sei se isso é do exemplo ou se é pra ser assim no final mesmo
