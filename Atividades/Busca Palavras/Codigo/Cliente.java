@@ -27,6 +27,7 @@ class Cliente {
 			}
 		}
 
+		System.out.println("Cliente leu:");
 		for(String s: texto){
 			System.out.println("Palavras lidas pelo cliente:" + s);
 		}

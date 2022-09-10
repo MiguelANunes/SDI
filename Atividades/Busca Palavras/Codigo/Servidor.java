@@ -53,6 +53,7 @@ class Servidor {
 			}
 		}
 
+		System.out.println("Servidor leu:");
 		for(String s: palavrasAlvo){
 			System.out.println("Palavras que o servidor quer:" + s);
 		}
