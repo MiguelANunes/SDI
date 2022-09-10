@@ -24,7 +24,7 @@ class Servidor {
 		String clientSentence = "1";
 		List<String> palavrasAlvo = new ArrayList<String>();
 		// abrindo uma socket para comunicar com o cliente
-		ServerSocket welcomeSocket = new ServerSocket(4242);
+		ServerSocket welcomeSocket = new ServerSocket(50001);
 
 		Scanner sc = new Scanner(System.in);
 		String s1 = "";
@@ -61,7 +61,7 @@ class Servidor {
 			// inicializando
 			palavrasEncontradas.put(alvo, 0);
 		}
-		String returnString = "0";
+		String returnString = "";
 		while (true){
 			// recebendo do cliente
 			clientSentence = inFromClient.readLine();
@@ -72,9 +72,11 @@ class Servidor {
 				for(String alvo: palavrasAlvo){
 					// "$" marca fim de linha, não posso colocar \n pois não tenho como
 					// facilmente ler várias linhas no cliente
-					returnString = alvo + palavrasEncontradas.get(alvo).toString() + "$";
+					returnString = returnString + alvo + "=" + palavrasEncontradas.get(alvo).toString() + "-";
 				}
-				outToClient.writeBytes(returnString);
+				// removendo o último $ pois ele não é necessário
+				returnString = returnString.substring(0, returnString.length()-1);
+				outToClient.writeBytes(returnString+"\n");
 				break;
 			}
 			// se não, processo
@@ -87,7 +89,6 @@ class Servidor {
 		}
 
 		welcomeSocket.close();
-		System.out.println("Servidor finalizado com sucesso!");
 		System.exit(0);
 	}
 }

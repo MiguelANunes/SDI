@@ -31,7 +31,7 @@ class Cliente {
 		// }
 
 		// abrindo uma socket p/ o servidor
-		Socket clientSocket = new Socket("localhost", 4242);
+		Socket clientSocket = new Socket("ens1", 50001);
 		// configurando para mandar p/ o servidor
 		DataOutputStream outToServer
 				= new DataOutputStream(
@@ -52,10 +52,13 @@ class Cliente {
 		serverResponse = inFromServer.readLine();
 		clientSocket.close();
 
-		serverResponse.replace("$", "\n");
+		String[] totais = serverResponse.split("-");
+		// System.out.println(totais);
 
 		System.out.println("##RELATORIO##;");
-		System.out.println(serverResponse);
+		for(String s: totais){
+			System.out.println(s+";");
+		}
 		System.out.println("###;");
 		System.exit(0);
 	}
