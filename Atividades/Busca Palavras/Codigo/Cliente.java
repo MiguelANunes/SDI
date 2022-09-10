@@ -12,22 +12,22 @@ class Cliente {
 		List<String> texto = new ArrayList<String>();
 
 		Scanner sc = new Scanner(System.in);
+		String s1 = "";
 		while(sc.hasNextLine()){
-			// quando tenho que começar a ler o texto
-			if(sc.nextLine() == "##Clientes##;"){
-				// quando retornou essa "##Clientes##;", quer dizer que já passou por ela
-				// logo não preciso me preocupar com ela estar em texto
-				while(sc.nextLine() != "###;"){
-					// lê o texto até achar o marcador que acabou
-					texto.add(sc.nextLine());
+			s1 = sc.nextLine();
+			// só começo a ler quando acho as palavras do cliente
+			if(s1.equals("##Clientes##;")){
+				while(true){
+					s1 = sc.nextLine();
+					// e paro quando acho o delimitador
+					if(s1.equals("###;")) break;
+					texto.add(s1);
 				}
-			}
-			else{
+			}else{
 				continue;
 			}
 		}
 
-		System.out.println("Cliente leu:");
 		for(String s: texto){
 			System.out.println("Palavras lidas pelo cliente:" + s);
 		}

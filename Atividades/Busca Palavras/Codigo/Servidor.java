@@ -38,17 +38,18 @@ class Servidor {
 		ServerSocket welcomeSocket = new ServerSocket(4242);
 
 		Scanner sc = new Scanner(System.in);
+		String s1 = "";
 		while(sc.hasNextLine()){
-			// quando tenho que começar a ler o texto
-			if(sc.nextLine() == "##Servidor##;"){
-				// quando retornou essa "##Clientes##;", quer dizer que já passou por ela
-				// logo não preciso me preocupar com ela estar em texto
-				while(sc.nextLine() != "##Clientes##;"){
-					// lê o texto até achar o marcador que acabou
-					palavrasAlvo.add(sc.nextLine());
+			s1 = sc.nextLine();
+			// só começo a ler a partir da tag que marca as palavras do servidor
+			if(s1.equals("##Servidor##;")){
+				while(true){
+					s1 = sc.nextLine();
+					// e paro quando acho as palavras do cliente
+					if(s1.equals("##Clientes##;")) break;
+					palavrasAlvo.add(s1);
 				}
-			}
-			else{
+			}else{
 				continue;
 			}
 		}
