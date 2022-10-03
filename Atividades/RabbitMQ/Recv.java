@@ -8,182 +8,183 @@ import com.rabbitmq.client.*;
 
 public class Recv {
 
-  private final static int port = 5672;
-  private static String newMessage = null;
+	private static String newMessage = null;
+	private final static String QUEUE_NAME = "hello";
 
 
-  public static void main(String[] argv) throws Exception {
-		HashMap<String, Integer> elements = new HashMap<>();
-		fillDict(elements);
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setUsername("sdi");
-    factory.setPassword("sdi");
-    factory.setVirtualHost("/");
-    factory.setHost("ens1");
-    factory.setPort(port);
+	public static void main(String[] argv) throws Exception {
 
-    Connection connection = factory.newConnection();
-    Channel channel = connection.createChannel();
+		HashMap<String, Integer> MapaElementos = new HashMap<>();
+		populateMap(MapaElementos);
 
-    channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-    
-    Consumer consumer = new DefaultConsumer(channel) {
-      @Override
-      public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+		ConnectionFactory factory = new ConnectionFactory();
+		factory.setUsername("sdi");
+		factory.setPassword("sdi");
+		factory.setVirtualHost("/");
+		factory.setHost("ens1");
+		factory.setPort(6969);
+
+		Connection connection = factory.newConnection();
+		Channel channel = connection.createChannel();
+
+		channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+		Consumer consumer = new DefaultConsumer(channel) {
+		@Override
+		public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
 			throws IOException {
-				String message = new String(body, "UTF-8");
-				newMessage = decrypt(message, elements);
-				
-				System.out.println("##RELATORIO##;");
-    		System.out.println(newMessage);
-    		System.out.println("###;");
-				System.exit(0);
-      }
-    };
-    channel.basicConsume(QUEUE_NAME, true, consumer);
 
-  } // main
+			String message = new String(body, "UTF-8");
+			newMessage = decrypt(message, MapaElementos);
 
-	public static void fillDict(Map<String, Integer> my_dict) {
-		my_dict.put("H", 1);
-		my_dict.put("He", 2);
-		my_dict.put("Li", 3);
-		my_dict.put("Be", 4);
-		my_dict.put("B", 5);
-		my_dict.put("C", 6);
-		my_dict.put("N", 7);
-		my_dict.put("O", 8);
-		my_dict.put("F", 9);
-		my_dict.put("Ne", 10);
-		my_dict.put("Na", 11);
-		my_dict.put("Mg", 12);
-		my_dict.put("Al", 13);
-		my_dict.put("Si", 14);
-		my_dict.put("P", 15);
-		my_dict.put("S", 16);
-		my_dict.put("Cl", 17);
-		my_dict.put("Ar", 18);
-		my_dict.put("K", 19);
-		my_dict.put("Ca", 20);
-		my_dict.put("Sc", 21);
-		my_dict.put("Ti", 22);
-		my_dict.put("V", 23);
-		my_dict.put("Cr", 24);
-		my_dict.put("Mn", 25);
-		my_dict.put("Fe", 26);
-		my_dict.put("Co", 27);
-		my_dict.put("Ni", 28);
-		my_dict.put("Cu", 29);
-		my_dict.put("Zc", 30);
-		my_dict.put("Ga", 31);
-		my_dict.put("Ge", 32);
-		my_dict.put("As", 33);
-		my_dict.put("Se", 34);
-		my_dict.put("Br", 35);
-		my_dict.put("Kr", 36);
-		my_dict.put("Rb", 37);
-		my_dict.put("Sr", 38);
-		my_dict.put("Y", 39);
-		my_dict.put("Zr", 40);
-		my_dict.put("Nb", 41);
-		my_dict.put("Mo", 42);
-		my_dict.put("Tc", 43);
-		my_dict.put("Ru", 44);
-		my_dict.put("Rh", 45);
-		my_dict.put("Pd", 46);
-		my_dict.put("Ag", 47);
-		my_dict.put("Cd", 48);
-		my_dict.put("In", 49);
-		my_dict.put("Sn", 50);
-		my_dict.put("Sb", 51);
-		my_dict.put("Te", 52);
-		my_dict.put("I", 53);
-		my_dict.put("Xe", 54);
-		my_dict.put("Cs", 55);
-		my_dict.put("Ba", 56);
-		my_dict.put("La", 57);
-		my_dict.put("Ce", 58);
-		my_dict.put("Pr", 59);
-		my_dict.put("Nd", 60);
-		my_dict.put("Pm", 61);
-		my_dict.put("Sm", 62);
-		my_dict.put("Eu", 63);
-		my_dict.put("Gd", 64);
-		my_dict.put("Tb", 65);
-		my_dict.put("Dy", 66);
-		my_dict.put("Ho", 67);
-		my_dict.put("Er", 68);
-		my_dict.put("Tm", 69);
-		my_dict.put("Yb", 70);
-		my_dict.put("Lu", 71);
-		my_dict.put("Hf", 72);
-		my_dict.put("Ta", 73);
-		my_dict.put("W", 74);
-		my_dict.put("Re", 75);
-		my_dict.put("Os", 76);
-		my_dict.put("Ir", 77);
-		my_dict.put("Pt", 78);
-		my_dict.put("Au", 79);
-		my_dict.put("Hg", 80);
-		my_dict.put("Tl", 81);
-		my_dict.put("Pb", 82);
-		my_dict.put("Bi", 83);
-		my_dict.put("Po", 84);
-		my_dict.put("At", 85);
-		my_dict.put("Rn", 86);
-		my_dict.put("Fr", 87);
-		my_dict.put("Ra", 88);
-		my_dict.put("Ac", 89);
-		my_dict.put("Th", 90);
-		my_dict.put("Pa", 91);
-		my_dict.put("U", 92);
-		my_dict.put("Np", 93);
-		my_dict.put("Pu", 94);
-		my_dict.put("Am", 95);
-		my_dict.put("Cm", 96);
-		my_dict.put("Bk", 97);
-		my_dict.put("Cf", 98);
-		my_dict.put("Es", 99);
-		my_dict.put("Fm", 100);
-		my_dict.put("Md", 101);
-		my_dict.put("No", 102);
-		my_dict.put("Lr", 103);
-		my_dict.put("Rf", 104);
-		my_dict.put("Db", 105);
-		my_dict.put("Sg", 106);
-		my_dict.put("Bh", 107);
-		my_dict.put("Hs", 108);
-		my_dict.put("Mt", 109);
-		my_dict.put("Ds", 110);
-		my_dict.put("Rg", 111);
-		my_dict.put("Cn", 112);
-		my_dict.put("Nh", 113);
-		my_dict.put("Fl", 114);
-		my_dict.put("Mc", 115);
-		my_dict.put("Lv", 116);
-		my_dict.put("Ts", 117);
-		my_dict.put("Og", 118);
+			System.out.println("##RELATORIO##;");
+			System.out.println(newMessage);
+			System.out.println("###;");
+			System.exit(0);
+			}
+		};
+		channel.basicConsume(QUEUE_NAME, true, consumer);
 
+	} 
+
+	public static void populateMap(Map<String, Integer> Map) {
+		Map.put("H",    1);
+		Map.put("He",   2);
+		Map.put("Li",   3);
+		Map.put("Be",   4);
+		Map.put("B",    5);
+		Map.put("C",    6);
+		Map.put("N",    7);
+		Map.put("O",    8);
+		Map.put("F",    9);
+		Map.put("Ne",  10);
+		Map.put("Na",  11);
+		Map.put("Mg",  12);
+		Map.put("Al",  13);
+		Map.put("Si",  14);
+		Map.put("P",   15);
+		Map.put("S",   16);
+		Map.put("Cl",  17);
+		Map.put("Ar",  18);
+		Map.put("K",   19);
+		Map.put("Ca",  20);
+		Map.put("Sc",  21);
+		Map.put("Ti",  22);
+		Map.put("V",   23);
+		Map.put("Cr",  24);
+		Map.put("Mn",  25);
+		Map.put("Fe",  26);
+		Map.put("Co",  27);
+		Map.put("Ni",  28);
+		Map.put("Cu",  29);
+		Map.put("Zc",  30);
+		Map.put("Ga",  31);
+		Map.put("Ge",  32);
+		Map.put("As",  33);
+		Map.put("Se",  34);
+		Map.put("Br",  35);
+		Map.put("Kr",  36);
+		Map.put("Rb",  37);
+		Map.put("Sr",  38);
+		Map.put("Y",   39);
+		Map.put("Zr",  40);
+		Map.put("Nb",  41);
+		Map.put("Mo",  42);
+		Map.put("Tc",  43);
+		Map.put("Ru",  44);
+		Map.put("Rh",  45);
+		Map.put("Pd",  46);
+		Map.put("Ag",  47);
+		Map.put("Cd",  48);
+		Map.put("In",  49);
+		Map.put("Sn",  50);
+		Map.put("Sb",  51);
+		Map.put("Te",  52);
+		Map.put("I",   53);
+		Map.put("Xe",  54);
+		Map.put("Cs",  55);
+		Map.put("Ba",  56);
+		Map.put("La",  57);
+		Map.put("Ce",  58);
+		Map.put("Pr",  59);
+		Map.put("Nd",  60);
+		Map.put("Pm",  61);
+		Map.put("Sm",  62);
+		Map.put("Eu",  63);
+		Map.put("Gd",  64);
+		Map.put("Tb",  65);
+		Map.put("Dy",  66);
+		Map.put("Ho",  67);
+		Map.put("Er",  68);
+		Map.put("Tm",  69);
+		Map.put("Yb",  70);
+		Map.put("Lu",  71);
+		Map.put("Hf",  72);
+		Map.put("Ta",  73);
+		Map.put("W",   74);
+		Map.put("Re",  75);
+		Map.put("Os",  76);
+		Map.put("Ir",  77);
+		Map.put("Pt",  78);
+		Map.put("Au",  79);
+		Map.put("Hg",  80);
+		Map.put("Tl",  81);
+		Map.put("Pb",  82);
+		Map.put("Bi",  83);
+		Map.put("Po",  84);
+		Map.put("At",  85);
+		Map.put("Rn",  86);
+		Map.put("Fr",  87);
+		Map.put("Ra",  88);
+		Map.put("Ac",  89);
+		Map.put("Th",  90);
+		Map.put("Pa",  91);
+		Map.put("U",   92);
+		Map.put("Np",  93);
+		Map.put("Pu",  94);
+		Map.put("Am",  95);
+		Map.put("Cm",  96);
+		Map.put("Bk",  97);
+		Map.put("Cf",  98);
+		Map.put("Es",  99);
+		Map.put("Fm", 100);
+		Map.put("Md", 101);
+		Map.put("No", 102);
+		Map.put("Lr", 103);
+		Map.put("Rf", 104);
+		Map.put("Db", 105);
+		Map.put("Sg", 106);
+		Map.put("Bh", 107);
+		Map.put("Hs", 108);
+		Map.put("Mt", 109);
+		Map.put("Ds", 110);
+		Map.put("Rg", 111);
+		Map.put("Cn", 112);
+		Map.put("Nh", 113);
+		Map.put("Fl", 114);
+		Map.put("Mc", 115);
+		Map.put("Lv", 116);
+		Map.put("Ts", 117);
+		Map.put("Og", 118);
 	}
 
-	public static String decrypt(String word, HashMap<String, Integer> elements) {
+	public static String decrypt(String traduzir, HashMap<String, Integer> MapaElementos) {
 		int i;
 		int offset = 31;
 		int asciiInt = -1;
 		char asciiChar = '~';
-		String decryptWord = null;
+		String decryptWord = "";
 
-		for (i = 0; i < word.length() - 1; i++) {
-			// Search for uppercase
-			if (Character.isUpperCase(word.charAt(i))) {
-				// Element with 2 symbols
-				if (Character.isLowerCase(word.charAt(i + 1))) {
-					String element = String.valueOf(word.charAt(i));
-					i++;
-					String tmp = String.valueOf(word.charAt(i));
-					element = element.concat(tmp);
+		for (i = 0; i < traduzir.length(); i+=2){
+
+			// Se achamos uma letra maíuscula na string
+			if (Character.isUpperCase(traduzir.charAt(i))) {
+
+				// Se tem uma segunda letra, e é minúscula
+				if (Character.isLowerCase(traduzir.charAt(i + 1))) {
+					String elemento = String.valueOf(traduzir.charAt(i)).concat(String.valueOf(traduzir.charAt(i+1)));
 					//System.out.print(element + "|");
-					asciiInt = elements.get(element) + offset;
+					asciiInt = MapaElementos.get(elemento) + offset;
 					//System.out.print(asciiInt);
 					asciiChar = (char) asciiInt;
 					decryptWord = decryptWord + asciiChar;
@@ -191,9 +192,9 @@ public class Recv {
 				}
 				// Element with 1 Symbol
 				else {
-					String element = String.valueOf(word.charAt(i));
+					String element = String.valueOf(traduzir.charAt(i));
 					//System.out.print(element + "|");
-					asciiInt = elements.get(element) + offset;
+					asciiInt = MapaElementos.get(element) + offset;
 					//System.out.print(asciiInt);
 					asciiChar = (char) asciiInt;
 					decryptWord = decryptWord + asciiChar;
@@ -201,20 +202,20 @@ public class Recv {
 				}
 			}
 			// If value is digit, we have digit.digit+element
-			else if (Character.isDigit(word.charAt(i))) {
-				int multiplier = Character.getNumericValue(word.charAt(i));
+			else if (Character.isDigit(traduzir.charAt(i))) {
+				int multiplier = Character.getNumericValue(traduzir.charAt(i));
 				i++; // ponto
 				i++; // Próximo numero
-				int arred = Character.getNumericValue(word.charAt(i));
+				int arred = Character.getNumericValue(traduzir.charAt(i));
 				i++;
 				// Element with 2 symbols
-				if (Character.isLowerCase(word.charAt(i + 1))) {
-					String element = String.valueOf(word.charAt(i));
+				if (Character.isLowerCase(traduzir.charAt(i + 1))) {
+					String element = String.valueOf(traduzir.charAt(i));
 					i++;
-					String tmp = String.valueOf(word.charAt(i));
+					String tmp = String.valueOf(traduzir.charAt(i));
 					element = element.concat(tmp);
 					//System.out.print(element + "|");
-					asciiInt = (multiplier * elements.get(element)) + offset + arred;
+					asciiInt = (multiplier * MapaElementos.get(element)) + offset + arred;
 					//System.out.print(asciiInt);
 					asciiChar = (char) asciiInt;
 					decryptWord = decryptWord + asciiChar;
@@ -222,9 +223,9 @@ public class Recv {
 				}
 				// Element with 1 symbol
 				else {
-					String element = String.valueOf(word.charAt(i));
+					String element = String.valueOf(traduzir.charAt(i));
 					//System.out.print(element + "|");
-					asciiInt = (multiplier * elements.get(element)) + offset + arred;
+					asciiInt = (multiplier * MapaElementos.get(element)) + offset + arred;
 					//System.out.print(asciiInt);
 					asciiChar = (char) asciiInt;
 					decryptWord = decryptWord + asciiChar;
