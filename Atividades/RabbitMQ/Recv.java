@@ -9,7 +9,8 @@ import com.rabbitmq.client.*;
 public class Recv {
 
 	private static String newMessage = null;
-	private final static String QUEUE_NAME = "hello";
+	private final static String FILA_ToServer = "inputGRUPO3AAG";
+	private final static String FILA_ToClient = "outputGRUPO3AAG";
 
 
 	public static void main(String[] argv) throws Exception {
@@ -22,28 +23,27 @@ public class Recv {
 		factory.setPassword("sdi");
 		factory.setVirtualHost("/");
 		factory.setHost("ens1");
-		factory.setPort(6969);
+		factory.setPort(5672);
 
 		Connection connection = factory.newConnection();
-		Channel channel = connection.createChannel();
+		Channel channelToServer  = connection.createChannel();
+		Channel channelToClient = connection.createChannel();
 
-		channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+		channelToServer.queueDeclare(FILA_ToServer, false, false, false, null);
+		channelToClient.queueDeclare(FILA_ToClient, false, false, false, null);
 
-		Consumer consumer = new DefaultConsumer(channel) {
-		@Override
-		public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-			throws IOException {
+		Consumer consumer = new DefaultConsumer(channelToServer){
+			@Override
+			public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
+				throws IOException {
 
-			String message = new String(body, "UTF-8");
-			newMessage = decrypt(message, MapaElementos);
-
-			System.out.println("##RELATORIO##;");
-			System.out.println(newMessage);
-			System.out.println("###;");
-			System.exit(0);
-			}
+				String message = new String(body, "UTF-8");
+				String newMessage = decrypt(message, MapaElementos);
+				// System.out.println(newMessage);
+				channelToClient.basicPublish("", FILA_ToClient, null, newMessage.getBytes("UTF-8"));
+				}
 		};
-		channel.basicConsume(QUEUE_NAME, true, consumer);
+		channelToServer.basicConsume(FILA_ToServer, true, consumer);
 
 	} 
 
@@ -170,71 +170,64 @@ public class Recv {
 
 	public static String decrypt(String traduzir, HashMap<String, Integer> MapaElementos) {
 		int i;
-		int offset = 31;
-		int asciiInt = -1;
-		char asciiChar = '~';
-		String decryptWord = "";
+		int round = 0;
+		int multiplier = 0;
+		String temp = "";
+		String elemento = "";
+		StringBuilder traduzida = new StringBuilder();
 
-		for (i = 0; i < traduzir.length(); i+=2){
+		for (i = 0; i < traduzir.length(); i++){
 
-			// Se achamos uma letra maíuscula na string
-			if (Character.isUpperCase(traduzir.charAt(i))) {
+			// Se achamos uma letra maíuscula na string -- é um elemento
+			if(Character.isUpperCase(traduzir.charAt(i))){
 
-				// Se tem uma segunda letra, e é minúscula
+				// Se tem uma segunda letra minúscula 
+				// Miguel: Poderia fazer isso diferente, visto que a segunda letra sempre será minuscula?
+
+				// separar obter as duas letras
+				if(Character.isLowerCase(traduzir.charAt(i + 1))){
+					elemento = String.valueOf(traduzir.charAt(i));
+					i += 1;
+					temp = String.valueOf(traduzir.charAt(i));
+					elemento += temp;
+					
+					traduzida.append((char) (MapaElementos.get(elemento) + 31));
+
+				}else{ // Se não tem mais uma letra
+					elemento = String.valueOf(traduzir.charAt(i));
+					
+					traduzida.append((char) (MapaElementos.get(elemento) + 31));
+				}
+			}else if(Character.isDigit(traduzir.charAt(i))){ // Se achamos um número
+
+				multiplier = Character.getNumericValue(traduzir.charAt(i));   // multiplicador do caractere
+				i += 2;
+				round = Character.getNumericValue(traduzir.charAt(i)); // arredondamento
+				// +2 caractere imediatamente depois do número é um ponto
+
+				// Se depois do número tem um elemento com dois caracteres
+				i += 1;
 				if (Character.isLowerCase(traduzir.charAt(i + 1))) {
-					String elemento = String.valueOf(traduzir.charAt(i)).concat(String.valueOf(traduzir.charAt(i+1)));
-					//System.out.print(element + "|");
-					asciiInt = MapaElementos.get(elemento) + offset;
-					//System.out.print(asciiInt);
-					asciiChar = (char) asciiInt;
-					decryptWord = decryptWord + asciiChar;
-					//System.out.print(asciiChar + "\n");
+					elemento = String.valueOf(traduzir.charAt(i));
+					i += 1;
+					temp = String.valueOf(traduzir.charAt(i));
+					elemento += temp;
+					int temp1 = multiplier * MapaElementos.get(elemento);
+
+					traduzida.append((char) (temp1 + 31 + round));
 				}
-				// Element with 1 Symbol
+				// Se tem apenas um caractere
 				else {
-					String element = String.valueOf(traduzir.charAt(i));
-					//System.out.print(element + "|");
-					asciiInt = MapaElementos.get(element) + offset;
-					//System.out.print(asciiInt);
-					asciiChar = (char) asciiInt;
-					decryptWord = decryptWord + asciiChar;
-					//System.out.print(asciiChar + "\n");
-				}
-			}
-			// If value is digit, we have digit.digit+element
-			else if (Character.isDigit(traduzir.charAt(i))) {
-				int multiplier = Character.getNumericValue(traduzir.charAt(i));
-				i++; // ponto
-				i++; // Próximo numero
-				int arred = Character.getNumericValue(traduzir.charAt(i));
-				i++;
-				// Element with 2 symbols
-				if (Character.isLowerCase(traduzir.charAt(i + 1))) {
-					String element = String.valueOf(traduzir.charAt(i));
-					i++;
-					String tmp = String.valueOf(traduzir.charAt(i));
-					element = element.concat(tmp);
-					//System.out.print(element + "|");
-					asciiInt = (multiplier * MapaElementos.get(element)) + offset + arred;
-					//System.out.print(asciiInt);
-					asciiChar = (char) asciiInt;
-					decryptWord = decryptWord + asciiChar;
-					//System.out.print(asciiChar + "\n");
-				}
-				// Element with 1 symbol
-				else {
-					String element = String.valueOf(traduzir.charAt(i));
-					//System.out.print(element + "|");
-					asciiInt = (multiplier * MapaElementos.get(element)) + offset + arred;
-					//System.out.print(asciiInt);
-					asciiChar = (char) asciiInt;
-					decryptWord = decryptWord + asciiChar;
-					//System.out.print(asciiChar + "\n");
+					elemento = String.valueOf(traduzir.charAt(i));
+					int temp1 = multiplier * MapaElementos.get(elemento);
+
+					traduzida.append((char) (temp1 + 31 + round));
 				}
 			}
 		}
 
-		return (decryptWord.substring(4));
+		return traduzida.toString();
 	}
 
 }
+
