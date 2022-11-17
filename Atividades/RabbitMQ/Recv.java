@@ -9,8 +9,8 @@ import com.rabbitmq.client.*;
 public class Recv {
 
 	private static String newMessage = null;
-	private final static String FILA_ToServer = "inputGRUPO3AAG";
-	private final static String FILA_ToClient = "outputGRUPO3AAG";
+	private final static String FILA_ToServer = "inputGRUPO3AAH";
+	private final static String FILA_ToClient = "outputGRUPO3AAH";
 
 
 	public static void main(String[] argv) throws Exception {

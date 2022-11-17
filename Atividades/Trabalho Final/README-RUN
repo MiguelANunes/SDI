@@ -1,0 +1,4 @@
+#    Este texto de ajuda tem por objetivo a esclarecer a forma de execução junto a plataforma.
+#       1) Configure o arquivo servidor.in adequando ao número de clientes desejados (pode ser 2), porém ALTERANDO o nome do diretório de destino para um nome único
+#       2) bash H 
+
